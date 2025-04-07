@@ -1,0 +1,6 @@
+.DS_Store
+Data/Original/*.csv
+Data/Original/*.csv
+Data/Original/*.csv
+Data/Processed/*.csv
+Data/Processed/*.pkl
