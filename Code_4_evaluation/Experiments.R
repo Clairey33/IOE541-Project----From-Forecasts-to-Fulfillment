@@ -251,14 +251,19 @@ SS<-function(SL, sd, L){
 
 
 #simulation function
-RS<-function(rsid,initial_stock, actual_demand, FT, L, SL, S=NULL, method){
+RS<-function(rsid,initial_stock, actual_demand,
+                                                  FT, L, SL,
+                                                  S=NULL, method){
   # L: lead time
   # SL: Target service level
-  # FT?
+  # FT: review periods
+  # S ? 
 
 
   if( any(is.null(initial_stock) | is.null(actual_demand) | is.null(FT) | is.null(L) | is.null(SL)) ) stop('Variable missing')
-  fh<-FT+L
+  
+  fh<-FT+L  # = R+L in paper
+  
   periods<-length(actual_demand)-1
 
  
@@ -280,10 +285,16 @@ RS<-function(rsid,initial_stock, actual_demand, FT, L, SL, S=NULL, method){
   for (periodid in c((known_periods+1):periods)){
     sent<-c(sent,min(actual_demand[periodid], s[periodid-1]))
     
-    if (periodid %in% round(seq(periods,1,by=-(FT)))){
+    if (periodid %in% round(seq(periods,1,by=-(FT)))){ # review the inventory, FT is R, review time, determine whether to refill
       count_ft<-count_ft+1
       known_demand<-head(actual_demand,periodid)
+
+
+      #ss is calculated under R+L time   ----- we can explain the logic of inventory control
       ss<-SS(SL, sd(known_demand), (L+FT))
+      
+      
+      
       if (is.null(S) || S==0){
         
         if (method=="Croston"){
@@ -338,25 +349,40 @@ RS<-function(rsid,initial_stock, actual_demand, FT, L, SL, S=NULL, method){
         
         if (class(forecast)=="try-error"){forecast<-0}
         if (any(forecast<0)){forecast[forecast<0]<-0}
+        
+        # I think Q here is target inventory level S in paper
         Q<-sum(forecast)+ss
         
+
         pinball_frc<-c(pinball_frc, Q)
         pinball_act<-c(pinball_act, sum(actual_demand[(periodid+1):(periodid+fh)]) )
       }else{
+        # the corresponed to is.null(S) || S==0, but in the code it seems S is never changed
         Q<-S
       }
       forecasts<-c(forecasts,head(forecast,fh)) #rep(forecast,FT))
       actual_demand_formetrics<-c(actual_demand_formetrics, actual_demand[(periodid+1):(periodid+fh)])
       frst_diffs<-c(frst_diffs,rep(mean(diff(known_demand)^2),FT))
-      orders<-c(orders, round(max(Q-s[periodid-1]+sent[periodid]-sum(orders[max(periodid-L,1):(periodid-1)]),0)))
-    }else{
+
+      #calculate order amount --- how much to order = up to level - net inventory
+      # net inventory = On-hand inventory + in-transit inventory - order not yet shiped
+      # on hand inventory = s[periodid-1]
+      # order not yet shiped = sent[periodid]
+      # in-transit inventory:
+      ### suppose current time is t, then any order occured at t-L to t is in transit-inventory
+      ### in-transit inventory = sum(orders[max(periodid-L,1):(periodid-1)])
+      orders<-c(orders, round(max(
+        Q-s[periodid-1]+sent[periodid]-sum(orders[max(periodid-L,1):(periodid-1)]), 0
+        )))
+
+    }else{  # no refill/ no order
       orders<-c(orders, 0)
       if (count_ft==0){
         forecasts<-c(forecasts, 0)
       }
     }
     
-    
+    #I guess s is inventory level at each time step, sent is actual decrease of inventory in each time step
     if (periodid <= L){
       s<-c(s, s[periodid-1]-sent[periodid])
     }else{
@@ -447,9 +473,20 @@ for (sel_method in m_names){
     res<-NULL
     
     for (t_t in c(3,7,14,21)){
+      # t_t is review periods 3, 7, 14, 21
       for (serl in c(0.9, 0.95, 0.99)){
+        # serl is service level
         for (l in c(3, 9)){
-          res<-rbind(res,data.frame(infos,sel_method,t(RS(infos,0,d_ts,t_t,l,serl,S=NULL,sel_method))))
+          # l  is lead time
+
+          res<-rbind(res,data.frame(infos,sel_method,t(RS(infos,
+                                                              0,   #initial stock
+                                                              d_ts, # actual deman
+                                                              t_t, # review periods
+                                                              l, #lead time
+                                                              serl, # service level
+                                                              S=NULL,
+                                                              sel_method))))
         }
       }
     }
