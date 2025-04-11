@@ -130,6 +130,13 @@ moveme <- function (invec, movecommand) {
 
 # Forecast methods ----------------------------------------------------------------------------
 Naive <- function(x, h, type="simple"){
+
+  #x is the historical data (e.g., a time series).
+
+  #h is how many steps ahead you want to predict 
+  #(the forecast horizon).
+
+
   frcst <- rep(tail(x,1), h)
   if (type=="seasonal"){
     frcst <- head(rep(as.numeric(tail(x,7)), h), h) 
@@ -271,7 +278,7 @@ RS<-function(rsid,initial_stock, actual_demand,
   
   known_periods<-periods-393 #365
 
-  #known demand = actual deman -> training data
+  #known demand = actual demand -> training data
   known_demand<-head(actual_demand,known_periods)
   
   orders=sent=backorders=frst_diffs<-rep(0,known_periods)
@@ -282,11 +289,18 @@ RS<-function(rsid,initial_stock, actual_demand,
   
   actual_demand_formetrics=pinball_frc=pinball_act<-c()
   aek_actual_demand=aek_forecasts<-NULL
+
+  #simulation starts here -----------------------------------------------------
   for (periodid in c((known_periods+1):periods)){
+    #periodid is increasing, day by day, time flies, simulation starts
     sent<-c(sent,min(actual_demand[periodid], s[periodid-1]))
     
-    if (periodid %in% round(seq(periods,1,by=-(FT)))){ # review the inventory, FT is R, review time, determine whether to refill
+    if (periodid %in% round(seq(periods,1,by=-(FT)))){ 
+      # review the inventory, FT is R, review time, determine whether to refill
+      #every FT days, we do the review, at this time, update known_demand
       count_ft<-count_ft+1
+
+      #note that known demand has been updated to periodid
       known_demand<-head(actual_demand,periodid)
 
 
@@ -321,6 +335,9 @@ RS<-function(rsid,initial_stock, actual_demand,
             forecast<-try((as.numeric(es(ts(tail(known_demand,56), frequency = 7), model = model, h=fh)$forecast)),silent = T)
           }
         }else if (method=="Naive"){
+          #fh<-FT+L  # = R+L in paper
+
+
           forecast<-try((Naive(known_demand,fh)),silent = T)
         }else if (method=="SNaive"){
           forecast<-try((Naive(known_demand,fh,"seasonal")),silent = T)
@@ -328,6 +345,8 @@ RS<-function(rsid,initial_stock, actual_demand,
           forecast<-try((MA(known_demand,fh)),silent = T)
         }else if (method=="ARIMA"){
           forecast<-try((as.numeric(forecast::forecast(auto.arima(ts(tail(known_demand,56), frequency = 7)), h=fh)$mean)),silent = T)
+        
+        
         }else if (method=="Comb"){
           if (start | (count_ft*FT %% 28)==0){
             model<-es(ts(tail(known_demand,56), frequency = 7), h=fh)
@@ -360,6 +379,7 @@ RS<-function(rsid,initial_stock, actual_demand,
         # the corresponed to is.null(S) || S==0, but in the code it seems S is never changed
         Q<-S
       }
+
       forecasts<-c(forecasts,head(forecast,fh)) #rep(forecast,FT))
       actual_demand_formetrics<-c(actual_demand_formetrics, actual_demand[(periodid+1):(periodid+fh)])
       frst_diffs<-c(frst_diffs,rep(mean(diff(known_demand)^2),FT))
