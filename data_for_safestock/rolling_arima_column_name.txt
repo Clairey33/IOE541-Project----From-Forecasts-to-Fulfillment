@@ -1,0 +1,16 @@
+review_index：The row index (0-based) in the time series corresponding to the review day. If review_index = 1520, it corresponds to d_1521.
+
+
+review_day：The name of the day in the original dataset (e.g., 'd_1521'), when the ARIMA model was updated and used to forecast.
+
+forecast_days: A label indicating the forecast horizon relative to the review point (e.g., 'F1' means 1 day ahead, 'F10' is 10 days ahead).
+
+forecast_index: The 0-based index of the day being predicted in the full time series
+## The first three columns will be identical for all predictions generated from the same review day.
+
+
+forecast_d: The name of the predicted day in d_ format (e.g., 'd_1522', 'd_1523', etc.). 
+
+forecast: The predicted sales value for that future day.
+
+
