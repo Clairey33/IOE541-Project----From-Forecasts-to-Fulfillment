@@ -5,3 +5,6 @@ Data/Original/*.csv
 Data/Processed/*.csv
 Data/Processed/*.pkl
 venv/
+
+
+Code_4_evaluation/Data_raw/*.csv
