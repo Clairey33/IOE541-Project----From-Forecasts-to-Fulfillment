@@ -1,0 +1,25 @@
+LGBM
+HOUSEHOLD_1_118
+                       0            1
+0                     FT     7.000000
+1                      L     3.000000
+2   target_service_level     0.990000
+3              fill_rate     1.000000
+4          service_level     1.000000
+5         mean_inventory   139.787390
+6          max_inventory   215.726939
+7             lost_sales     0.000000
+8      out_of_stock_days     0.000000
+9         inventory_days     9.319159
+10            sum_orders  5899.698497
+11          count_orders    53.000000
+12            sum_demand  8560.000000
+13         sum_forecasts  8441.870622
+14                    ME     0.214781
+15                   MAE     6.203103
+16                  RMSE     7.940854
+17                 RMSSE     0.017717
+18                 RMSsE     0.510218
+19                   FD2     0.000031
+20                   PLd     0.000004
+21                    PL     0.000004

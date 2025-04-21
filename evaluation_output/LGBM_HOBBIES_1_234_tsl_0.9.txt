@@ -1,0 +1,25 @@
+LGBM
+HOBBIES_1_234
+                       0            1
+0                     FT     7.000000
+1                      L     3.000000
+2   target_service_level     0.900000
+3              fill_rate     0.942742
+4          service_level     0.949682
+5         mean_inventory    72.664481
+6          max_inventory   224.948446
+7             lost_sales   224.279014
+8      out_of_stock_days    15.000000
+9         inventory_days     7.266448
+10            sum_orders  3802.016001
+11          count_orders    51.000000
+12            sum_demand  5908.000000
+13         sum_forecasts  5295.907906
+14                    ME     1.112895
+15                   MAE     8.932179
+16                  RMSE    12.744689
+17                 RMSSE     0.030139
+18                 RMSsE     1.186455
+19                   FD2     0.000050
+20                   PLd     0.000042
+21                    PL     0.000042

@@ -1,0 +1,25 @@
+ARIMA
+HOUSEHOLD_1_118
+                       0            1
+0                     FT     7.000000
+1                      L     3.000000
+2   target_service_level     0.990000
+3              fill_rate     1.000000
+4          service_level     1.000000
+5         mean_inventory   138.864177
+6          max_inventory   230.342640
+7             lost_sales     0.000000
+8      out_of_stock_days     0.000000
+9         inventory_days     9.257612
+10            sum_orders  5843.175950
+11          count_orders    53.000000
+12            sum_demand  8849.000000
+13         sum_forecasts  8905.964187
+14                    ME    -0.099937
+15                   MAE     4.602915
+16                  RMSE     6.006366
+17                 RMSSE     0.013364
+18                 RMSsE     0.386894
+19                   FD2     0.000023
+20                   PLd     0.000004
+21                    PL     0.000004

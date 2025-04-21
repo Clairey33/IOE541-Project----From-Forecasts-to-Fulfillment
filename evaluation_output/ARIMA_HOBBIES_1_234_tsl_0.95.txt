@@ -1,0 +1,25 @@
+ARIMA
+HOBBIES_1_234
+                       0            1
+0                     FT     7.000000
+1                      L     3.000000
+2   target_service_level     0.950000
+3              fill_rate     0.997347
+4          service_level     0.997189
+5         mean_inventory    85.244419
+6          max_inventory   209.417302
+7             lost_sales    10.934831
+8      out_of_stock_days     1.000000
+9         inventory_days     7.749493
+10            sum_orders  4258.680037
+11          count_orders    53.000000
+12            sum_demand  6172.000000
+13         sum_forecasts  6173.060881
+14                    ME    -0.001861
+15                   MAE     7.999962
+16                  RMSE    11.187818
+17                 RMSSE     0.026185
+18                 RMSsE     1.033224
+19                   FD2     0.000044
+20                   PLd     0.000012
+21                    PL     0.000012

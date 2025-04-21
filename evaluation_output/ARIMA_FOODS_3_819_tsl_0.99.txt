@@ -1,0 +1,25 @@
+ARIMA
+FOODS_3_819
+                       0           1
+0                     FT    7.000000
+1                      L    3.000000
+2   target_service_level    0.990000
+3              fill_rate    1.000000
+4          service_level    1.000000
+5         mean_inventory   38.488359
+6          max_inventory   58.695438
+7             lost_sales    0.000000
+8      out_of_stock_days    0.000000
+9         inventory_days   38.488359
+10            sum_orders  635.787321
+11          count_orders   50.000000
+12            sum_demand  957.000000
+13         sum_forecasts  989.613525
+14                    ME   -0.057217
+15                   MAE    1.271633
+16                  RMSE    1.681603
+17                 RMSSE    0.010315
+18                 RMSsE    1.001582
+19                   FD2    0.000048
+20                   PLd    0.000012
+21                    PL    0.000012

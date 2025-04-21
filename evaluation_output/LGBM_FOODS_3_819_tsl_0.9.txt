@@ -1,0 +1,25 @@
+LGBM
+FOODS_3_819
+                       0           1
+0                     FT    7.000000
+1                      L    3.000000
+2   target_service_level    0.900000
+3              fill_rate    1.000000
+4          service_level    1.000000
+5         mean_inventory   24.115409
+6          max_inventory   35.968558
+7             lost_sales    0.000000
+8      out_of_stock_days    0.000000
+9         inventory_days   24.115409
+10            sum_orders  632.827510
+11          count_orders   52.000000
+12            sum_demand  916.000000
+13         sum_forecasts  920.614077
+14                    ME   -0.008389
+15                   MAE    1.248214
+16                  RMSE    1.694654
+17                 RMSSE    0.010411
+18                 RMSsE    1.017532
+19                   FD2    0.000047
+20                   PLd    0.000066
+21                    PL    0.000066
