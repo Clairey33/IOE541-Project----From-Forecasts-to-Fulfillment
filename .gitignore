@@ -8,3 +8,4 @@ venv/
 
 
 Code_4_evaluation/Data_raw/*.csv
+Code_4_evaluation/output/*.txt

@@ -31,25 +31,34 @@ def safety_stock(SL, sd, L):
 
 def get_demand_data(product_id):
     '''
-    Very draft version
+    Very draft version, 04/19, sum over state
     '''
     file_path = os.path.join(current_dir, "Data_raw/sales_train_evaluation.csv")
     df = pd.read_csv(file_path, header=0)
-    df = df.loc[df['id']==product_id].T
+    df = df.loc[(df['item_id']==product_id) & (df['state_id']=="TX")]
+    df = df.sum(axis=0)
     df = df.drop(df.index[range(6)])
     df = df.reset_index()
     df.columns = ["step", "demand"]
     return(df)
 
+def get_method_forecast(parent_dir="Data_raw"):
+    '''
+    return a file name list
+    '''
+    folder_path = os.path.join(current_dir, f"{parent_dir}")
+    csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv') and f!= "sales_train_evaluation.csv"]
+    print(csv_files)
+    return csv_files
 
 
-def ARIMA_forecast(forecast_f):
+def get_forecast_data(forecast_f):
     '''
     return a map, key is review day, value is a list for prediction t+1, t+2, ..., t+R+L
     '''
     file_path = os.path.join(current_dir, f"Data_raw/{forecast_f}")
     forecast_df = pd.read_csv(file_path, header=0)
-    forecasts = forecast_df.groupby("review_day")["forecast"].apply(list).to_dict()
+    forecasts = forecast_df.groupby("review_index")["forecast"].apply(list).to_dict()
     return forecasts
 
 
@@ -90,12 +99,22 @@ def RS(FT=7,
     review_periods = forecasts.keys()
 
     fh = FT + L   # forecast horizon = review period + lead time
+
+
     last_day = actual_demand.iloc[-1, 0] # should be d_{a number}
     n_days = actual_demand.shape[0] # row numbers
     assert int(last_day[2:])==n_days
+
+    review_days = [int(d)+1 for d in review_periods] 
+
+    # we adjust last day, make it equal to the last review day
+    last_review_day = max(review_days)
+    known_periods = last_review_day - 393 
+
     # initial/training demand period 
     # known_periods means from d_1 to d_known_periods is the training data
-    known_periods = n_days - 393 
+
+
 
     # Known demand is the training data
     known_demand = actual_demand.iloc[:known_periods, 1]
@@ -122,9 +141,9 @@ def RS(FT=7,
     pinball_frc = []
     pinball_act = []
     #adjust to pure number
-    review_days = [int(d[2:]) for d in review_periods] 
 
-    for t in range(known_periods+1, n_days+1):
+
+    for t in range(known_periods+1, last_review_day +1):
         # Append sent: actual dispatch is the minimum of demand and available stock at previous period.
         if debug:
             with open("ana.txt", "a") as f:
@@ -145,16 +164,15 @@ def RS(FT=7,
             ss = safety_stock(SL, sigma, L + FT)
 
             if S is None or S == 0:
-                # Select forecast method – all computations are wrapped in a try block.
                 try:
                     if method == "ARIMA":
-                        forecast = forecasts[f'd_{t}']
+                        forecast = forecasts[t-1]
                     elif method == "LGBM":
-                        # In the R code this reads a file. Here we raise an error.
-                        raise NotImplementedError("LGBM forecast method not implemented.")
+                        forecast = forecasts[t-1]
                     else:
                         pass
                 except Exception as e:
+                    print(e)
                     forecast = [0] * fh
                 # Ensure nonnegative forecasts
                 forecast = [max(0, f) for f in forecast]
@@ -224,7 +242,8 @@ def RS(FT=7,
     # For inventory and orders, take the tail (dropping the first cutoff elements) last 365 days 
     inv = np.array(s[-365:])
     ords = np.array(orders[-365:])
-    actual_demand_list = actual_demand.iloc[-365:, 1].to_numpy()
+    actual_demand_list = actual_demand.iloc[last_review_day-365:last_review_day, 1].to_numpy()
+    
     # Pinball loss calculation
     temp_sum = []
     for act_val, frc_val in zip(pinball_act, pinball_frc):
@@ -272,27 +291,41 @@ def RS(FT=7,
 
 
 if __name__=="__main__":
-    product_id = "FOODS_3_819_WI_3_evaluation"
-    forecast_f = "rolling_forecasts_arima.csv"
 
-    actual_demand = get_demand_data(product_id)
-    forecasts = ARIMA_forecast(forecast_f)
+    csv_files = get_method_forecast()
 
-    review_time = 7
-    lead_time = 3
-    service_level = 0.90
-    method = "ARIMA"
+    for ff in csv_files:
 
-    (output, (sent, inventory, orders)) = RS(FT=review_time, 
-                                             L=lead_time, 
-                                             SL=service_level, 
-                                             initial_stock=0, 
-                                             actual_demand=actual_demand, 
-                                             forecasts=forecasts,
-                                             S=None, 
-                                             method="ARIMA",
-                                             debug = False)
-    
-    output_df = pd.DataFrame(output)
+        method, product_id = ff.lower().split("_", 1)
 
-    print(output_df)
+        product_id = product_id.rsplit('_', 1)[0].upper()
+        product_id = product_id[:-3]
+        print(product_id)
+
+        method = method.upper()
+
+        actual_demand = get_demand_data(product_id)
+        forecasts = get_forecast_data(ff)
+        review_time = 7
+        lead_time = 3
+
+        for tsl in [0.90, 0.95, 0.99]:
+            service_level = tsl
+
+            (output, (sent, inventory, orders)) = RS(FT=review_time, 
+                                                     L=lead_time, 
+                                                     SL=service_level, 
+                                                     initial_stock=0, 
+                                                     actual_demand=actual_demand, 
+                                                     forecasts=forecasts,
+                                                     S=None, 
+                                                     method=method,
+                                                     debug = True)
+
+            output_df = pd.DataFrame(output)
+            with open(os.path.join(current_dir, f"output/{method}_{product_id}_tsl_{service_level}.txt"), "w") as fw:
+                print(method, file=fw)
+                print(product_id, file=fw)
+                print(output_df, file=fw)
+
+            #exit()
