@@ -1,7 +1,7 @@
 # From Forecasts to Fulfillment: Evaluating ARIMA and LGBM in a Simulation-Based Inventory Framework
 
-## University of Michigan  
-### Contributors: Minxuan Chen | Yiyang Shi | Yushan Yao | Qianxi Zhang
+#### University of Michigan, Industrial and Operation Engineering
+#### Contributors: Minxuan Chen | Yiyang Shi | Yushan Yao | Qianxi Zhang
 
 ---
 
